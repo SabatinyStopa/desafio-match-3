@@ -59,6 +59,7 @@ namespace Gazeus.DesafioMatch3.Views
                         {
                             SpriteRenderer tile = Instantiate(_tilePrefab);
 
+                            tile.transform.localScale = Vector3.zero;
                             tile.color = _tilePrefabRepository.TileTypes[tileTypeIndex];
                             tileSpot.SetTile(tile.gameObject);
                             _tiles[y][x] = tile.gameObject;
@@ -71,6 +72,8 @@ namespace Gazeus.DesafioMatch3.Views
         public Tween CreateTile(List<AddedTileInfo> addedTiles)
         {
             Sequence sequence = DOTween.Sequence();
+            float animationDuration = 0.5f;
+
             for (int i = 0; i < addedTiles.Count; i++)
             {
                 AddedTileInfo addedTileInfo = addedTiles[i];
@@ -82,7 +85,7 @@ namespace Gazeus.DesafioMatch3.Views
                 tileSpot.SetTile(tile.gameObject);
                 _tiles[position.y][position.x] = tile.gameObject;
                 tile.transform.localScale = Vector2.zero;
-                sequence.Join(tile.transform.DOScale(1.0f, 0.2f));
+                sequence.Join(tile.transform.DOScale(1.0f, animationDuration));
             }
 
             return sequence;
@@ -139,6 +142,106 @@ namespace Gazeus.DesafioMatch3.Views
             (_tiles[toY][toX], _tiles[fromY][fromX]) = (_tiles[fromY][fromX], _tiles[toY][toX]);
 
             return sequence;
+        }
+
+
+        /// <summary>
+        /// Faz o tabuleiro aparecer em efeito cascata
+        /// </summary>
+        /// <returns></returns>
+        public Tween MakeAllTilesPopUp()
+        {
+            Sequence sequence = DOTween.Sequence();
+            float intervalDuration = 0.1f;
+            float animationDuration = 0.5f;
+
+            if (_tiles == null || _tiles.Length == 0)
+            {
+                return sequence;
+            }
+
+            int numRows = _tiles.Length;
+            int numCols = _tiles[0].Length;
+
+            bool[,] processed = new bool[numRows, numCols];
+
+            float currentTime = 0f;
+            int maxSteps = Mathf.Max(numRows, numCols);
+
+            for (int step = 0; step < maxSteps; step++)
+            {
+                int targetCol = numCols - 1 - step;
+                int targetRow = step;
+                bool addedAnyInThisStep = false;
+
+                if (targetCol >= 0)
+                {
+                    for (int r = 0; r < numRows; r++)
+                    {
+                        if (r < numRows && targetCol < _tiles[r].Length && !processed[r, targetCol])
+                        {
+                            AnimateTile(
+                                _tiles[r][targetCol],
+                                sequence,
+                                currentTime,
+                                animationDuration
+                            );
+                            processed[r, targetCol] = true;
+                            addedAnyInThisStep = true;
+                        }
+                    }
+                }
+
+                if (targetRow < numRows && _tiles[targetRow] != null)
+                {
+                    for (int c = 0; c < _tiles[targetRow].Length; c++)
+                    {
+                        if (!processed[targetRow, c])
+                        {
+                            AnimateTile(
+                                _tiles[targetRow][c],
+                                sequence,
+                                currentTime,
+                                animationDuration
+                            );
+                            processed[targetRow, c] = true;
+                            addedAnyInThisStep = true;
+                        }
+                    }
+                }
+
+                if (addedAnyInThisStep)
+                {
+                    currentTime += intervalDuration;
+                }
+            }
+
+            return sequence;
+        }
+
+        private void AnimateTile(GameObject tile, Sequence sequence, float atTime, float duration)
+        {
+            if (tile == null)
+            {
+                return;
+            }
+
+            tile.transform.localScale = Vector3.zero;
+
+            Sequence tileSequence = DOTween.Sequence();
+
+            tileSequence.Append(tile.transform.DOScale(Vector3.one, duration * 0.7f));
+
+            tileSequence.Append(
+                tile.transform.DOPunchScale(
+                    new Vector3(0.2f, 0.2f, 0.2f),
+                    duration * 0.3f,
+                    vibrato: 1,
+                    elasticity: 0.5f
+                )
+            );
+
+            sequence.Insert(atTime, tileSequence);
         }
 
         #region Events

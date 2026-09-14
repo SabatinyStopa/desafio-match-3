@@ -35,6 +35,7 @@ namespace Gazeus.DesafioMatch3.Controllers
         {
             List<List<Tile>> board = _gameService.StartGame(_boardWidth, _boardHeight);
             _boardView.CreateBoard(board);
+            _boardView.MakeAllTilesPopUp().Play();
         }
         #endregion
 
