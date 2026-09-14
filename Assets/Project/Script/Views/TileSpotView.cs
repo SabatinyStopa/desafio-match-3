@@ -1,25 +1,16 @@
 ﻿using System;
 using DG.Tweening;
 using UnityEngine;
-using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
 namespace Gazeus.DesafioMatch3.Views
 {
-    public class TileSpotView : MonoBehaviour
+    public class TileSpotView : MonoBehaviour, IPointerDownHandler
     {
         public event Action<int, int> Clicked;
 
-        [SerializeField] private Button _button;
-
         private int _x;
         private int _y;
-
-        #region Unity
-        private void Awake()
-        {
-            _button.onClick.AddListener(OnTileClick);
-        }
-        #endregion
 
         public Tween AnimatedSetTile(GameObject tile)
         {
@@ -41,9 +32,9 @@ namespace Gazeus.DesafioMatch3.Views
             tile.transform.position = transform.position;
         }
 
-        private void OnTileClick()
-        {
-            Clicked?.Invoke(_x, _y);
-        }
+        #region Interface
+        public void OnPointerDown(PointerEventData eventData) => Clicked?.Invoke(_x, _y);
+
+        #endregion
     }
 }

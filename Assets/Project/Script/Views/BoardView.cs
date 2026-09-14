@@ -4,7 +4,6 @@ using DG.Tweening;
 using Gazeus.DesafioMatch3.Models;
 using Gazeus.DesafioMatch3.ScriptableObjects;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace Gazeus.DesafioMatch3.Views
 {
@@ -12,16 +11,20 @@ namespace Gazeus.DesafioMatch3.Views
     {
         public event Action<int, int> TileClicked;
 
-        [SerializeField] private GridLayoutGroup _boardContainer;
-        [SerializeField] private TilePrefabRepository _tilePrefabRepository;
-        [SerializeField] private TileSpotView _tileSpotPrefab;
+        [SerializeField]
+        private Transform _boardContainer;
+
+        [SerializeField]
+        private TilePrefabRepository _tilePrefabRepository;
+
+        [SerializeField]
+        private SpriteRenderer _tilePrefab;
 
         private GameObject[][] _tiles;
         private TileSpotView[][] _tileSpots;
 
         public void CreateBoard(List<List<Tile>> board)
         {
-            _boardContainer.constraintCount = board[0].Count;
             _tiles = new GameObject[board.Count][];
             _tileSpots = new TileSpotView[board.Count][];
 
@@ -32,21 +35,34 @@ namespace Gazeus.DesafioMatch3.Views
 
                 for (int x = 0; x < board[0].Count; x++)
                 {
-                    TileSpotView tileSpot = Instantiate(_tileSpotPrefab);
-                    tileSpot.transform.SetParent(_boardContainer.transform, false);
-                    tileSpot.SetPosition(x, y);
-                    tileSpot.Clicked += TileSpot_Clicked;
+                    GameObject spot = new($"Tile Spot ({x}-{y})", typeof(TileSpotView));
 
-                    _tileSpots[y][x] = tileSpot;
+                    spot.transform.position = new Vector3(x * 1.3f, y * 1.3f, 0);
+                    spot.transform.SetParent(_boardContainer);
 
-                    int tileTypeIndex = board[y][x].Type;
-                    if (tileTypeIndex > -1)
+                    if (spot.TryGetComponent(out TileSpotView tileSpot))
                     {
-                        GameObject tilePrefab = _tilePrefabRepository.TileTypePrefabList[tileTypeIndex];
-                        GameObject tile = Instantiate(tilePrefab);
-                        tileSpot.SetTile(tile);
+                        tileSpot.SetPosition(x, y);
+                        tileSpot.Clicked += TileSpot_Clicked;
 
-                        _tiles[y][x] = tile;
+                        _tileSpots[y][x] = tileSpot;
+
+                        int tileTypeIndex = board[y][x].Type;
+
+                        if (tileTypeIndex < 0)
+                        {
+                            Debug.LogError(
+                                $"[Board View] Tile type should not be under zero, tileTypeIndex is {tileTypeIndex} x:{x} and y:{y}"
+                            );
+                        }
+                        else
+                        {
+                            SpriteRenderer tile = Instantiate(_tilePrefab);
+
+                            tile.color = _tilePrefabRepository.TileTypes[tileTypeIndex];
+                            tileSpot.SetTile(tile.gameObject);
+                            _tiles[y][x] = tile.gameObject;
+                        }
                     }
                 }
             }
@@ -59,15 +75,12 @@ namespace Gazeus.DesafioMatch3.Views
             {
                 AddedTileInfo addedTileInfo = addedTiles[i];
                 Vector2Int position = addedTileInfo.Position;
-
                 TileSpotView tileSpot = _tileSpots[position.y][position.x];
+                SpriteRenderer tile = Instantiate(_tilePrefab);
 
-                GameObject tilePrefab = _tilePrefabRepository.TileTypePrefabList[addedTileInfo.Type];
-                GameObject tile = Instantiate(tilePrefab);
-                tileSpot.SetTile(tile);
-
-                _tiles[position.y][position.x] = tile;
-
+                tile.color = _tilePrefabRepository.TileTypes[addedTiles[i].Type];
+                tileSpot.SetTile(tile.gameObject);
+                _tiles[position.y][position.x] = tile.gameObject;
                 tile.transform.localScale = Vector2.zero;
                 sequence.Join(tile.transform.DOScale(1.0f, 0.2f));
             }
