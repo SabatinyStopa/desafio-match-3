@@ -5,8 +5,8 @@ namespace Gazeus.DesafioMatch3.ScriptableObjects
     [CreateAssetMenu(fileName = "TilePrefabRepository", menuName = "Gameplay/TilePrefabRepository")]
     public class TilePrefabRepository : ScriptableObject
     {
-        [SerializeField] private GameObject[] _tileTypePrefabList;
+        [SerializeField] private Color[] _tilesTypes;
 
-        public GameObject[] TileTypePrefabList => _tileTypePrefabList;
+        public Color[] TileTypes => _tilesTypes;
     }
 }
