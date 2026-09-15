@@ -165,7 +165,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _boardContainer: {fileID: 1708812983}
   _tilePrefabRepository: {fileID: 11400000, guid: 153eac3747f207a40add49ed6e2dacb9, type: 2}
-  _tilePrefab: {fileID: 2761296567843299276, guid: 946fcb524dc9e2b44bd69a6c88d26117, type: 3}
+  _tilePrefab: {fileID: -6887417897539379301, guid: 946fcb524dc9e2b44bd69a6c88d26117, type: 3}
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0

@@ -10,9 +10,14 @@ namespace Gazeus.DesafioMatch3.Controllers
 {
     public class GameController : MonoBehaviour
     {
-        [SerializeField] private BoardView _boardView;
-        [SerializeField] private int _boardHeight = 10;
-        [SerializeField] private int _boardWidth = 10;
+        [SerializeField]
+        private BoardView _boardView;
+
+        [SerializeField]
+        private int _boardHeight = 10;
+
+        [SerializeField]
+        private int _boardWidth = 10;
 
         private GameService _gameService;
         private bool _isAnimating;
@@ -61,7 +66,8 @@ namespace Gazeus.DesafioMatch3.Controllers
 
         private void OnTileClick(int x, int y)
         {
-            if (_isAnimating) return;
+            if (_isAnimating)
+                return;
 
             if (_selectedX > -1 && _selectedY > -1)
             {
@@ -69,6 +75,7 @@ namespace Gazeus.DesafioMatch3.Controllers
                 {
                     _selectedX = -1;
                     _selectedY = -1;
+                    _boardView.GetTile(x, y).UnSelect();
                 }
                 else
                 {
@@ -78,13 +85,21 @@ namespace Gazeus.DesafioMatch3.Controllers
                         bool isValid = _gameService.IsValidMovement(_selectedX, _selectedY, x, y);
                         if (isValid)
                         {
-                            List<BoardSequence> swapResult = _gameService.SwapTile(_selectedX, _selectedY, x, y);
+                            List<BoardSequence> swapResult = _gameService.SwapTile(
+                                _selectedX,
+                                _selectedY,
+                                x,
+                                y
+                            );
                             AnimateBoard(swapResult, 0, () => _isAnimating = false);
                         }
                         else
                         {
-                            _boardView.SwapTiles(x, y, _selectedX, _selectedY).onComplete += () => _isAnimating = false;
+                            _boardView.SwapTiles(x, y, _selectedX, _selectedY).onComplete += () =>
+                                _isAnimating = false;
                         }
+
+                        _boardView.GetTile(_selectedX, _selectedY).UnSelect();
                         _selectedX = -1;
                         _selectedY = -1;
                     };
@@ -94,6 +109,8 @@ namespace Gazeus.DesafioMatch3.Controllers
             {
                 _selectedX = x;
                 _selectedY = y;
+
+                _boardView.GetTile(x, y).Select();
             }
         }
     }

@@ -12,7 +12,7 @@ namespace Gazeus.DesafioMatch3.Views
         private int _x;
         private int _y;
 
-        public Tween AnimatedSetTile(GameObject tile)
+        public Tween AnimateSetTile(GameObject tile)
         {
             tile.transform.SetParent(transform);
             tile.transform.DOKill();

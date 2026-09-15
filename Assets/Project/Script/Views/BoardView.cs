@@ -28,9 +28,9 @@ namespace Gazeus.DesafioMatch3.Views
         private TilePrefabRepository _tilePrefabRepository;
 
         [SerializeField]
-        private SpriteRenderer _tilePrefab;
+        private TileView _tilePrefab;
 
-        private GameObject[][] _tiles;
+        private TileView[][] _tiles;
         private TileSpotView[][] _tileSpots;
 
         public void CreateBoard(List<List<Tile>> board)
@@ -38,12 +38,12 @@ namespace Gazeus.DesafioMatch3.Views
             int rowCount = board.Count;
             int colCount = board[0].Count;
 
-            _tiles = new GameObject[rowCount][];
+            _tiles = new TileView[rowCount][];
             _tileSpots = new TileSpotView[rowCount][];
 
             for (int y = 0; y < rowCount; y++)
             {
-                _tiles[y] = new GameObject[colCount];
+                _tiles[y] = new TileView[colCount];
                 _tileSpots[y] = new TileSpotView[colCount];
 
                 for (int x = 0; x < colCount; x++)
@@ -60,13 +60,13 @@ namespace Gazeus.DesafioMatch3.Views
             foreach (var addedTile in addedTiles)
             {
                 Vector2Int pos = addedTile.Position;
-                SpriteRenderer tile = Instantiate(_tilePrefab);
+                TileView tile = Instantiate(_tilePrefab);
 
-                tile.color = _tilePrefabRepository.TileTypes[addedTile.Type];
+                tile.SetColor(_tilePrefabRepository.TileTypes[addedTile.Type]);
                 tile.transform.localScale = Vector3.zero;
 
                 _tileSpots[pos.y][pos.x].SetTile(tile.gameObject);
-                _tiles[pos.y][pos.x] = tile.gameObject;
+                _tiles[pos.y][pos.x] = tile;
 
                 sequence.Join(tile.transform.DOScale(Vector3.one, ANIMATION_DURATION));
             }
@@ -83,7 +83,7 @@ namespace Gazeus.DesafioMatch3.Views
                     continue;
                 }
 
-                Destroy(_tiles[pos.y][pos.x]);
+                Destroy(_tiles[pos.y][pos.x].gameObject);
                 _tiles[pos.y][pos.x] = null;
             }
 
@@ -92,7 +92,7 @@ namespace Gazeus.DesafioMatch3.Views
 
         public Tween MoveTiles(List<MovedTileInfo> movedTiles)
         {
-            GameObject[][] nextTilesState = CloneTilesGrid();
+            TileView[][] nextTilesState = CloneTilesGrid();
             Sequence sequence = DOTween.Sequence();
 
             foreach (var movedTile in movedTiles)
@@ -100,7 +100,9 @@ namespace Gazeus.DesafioMatch3.Views
                 Vector2Int from = movedTile.From;
                 Vector2Int to = movedTile.To;
 
-                sequence.Join(_tileSpots[to.y][to.x].AnimatedSetTile(_tiles[from.y][from.x]));
+                sequence.Join(
+                    GetTileSpot(to.x, to.y).AnimateSetTile(_tiles[from.y][from.x].gameObject)
+                );
                 nextTilesState[to.y][to.x] = _tiles[from.y][from.x];
             }
 
@@ -110,11 +112,16 @@ namespace Gazeus.DesafioMatch3.Views
 
         public Tween SwapTiles(int fromX, int fromY, int toX, int toY)
         {
-            Sequence sequence = DOTween.Sequence();
-            sequence.Append(_tileSpots[fromY][fromX].AnimatedSetTile(_tiles[toY][toX]));
-            sequence.Join(_tileSpots[toY][toX].AnimatedSetTile(_tiles[fromY][fromX]));
+            TileView tileFrom = GetTile(fromX, fromY);
+            TileView tileTo = GetTile(toX, toY);
 
-            (_tiles[toY][toX], _tiles[fromY][fromX]) = (_tiles[fromY][fromX], _tiles[toY][toX]);
+            Sequence sequence = DOTween.Sequence();
+            sequence.Append(GetTileSpot(fromX, fromY).AnimateSetTile(tileTo.gameObject));
+            sequence.Join(GetTileSpot(toX, toY).AnimateSetTile(tileFrom.gameObject));
+
+            _tiles[toY][toX] = tileFrom;
+            _tiles[fromY][fromX] = tileTo;
+
             return sequence;
         }
 
@@ -145,6 +152,10 @@ namespace Gazeus.DesafioMatch3.Views
             return sequence;
         }
 
+        public TileSpotView GetTileSpot(int x, int y) => _tileSpots[y][x];
+
+        public TileView GetTile(int x, int y) => _tiles[y][x];
+
         private void CreateTileSpotAndTile(List<List<Tile>> board, int x, int y)
         {
             GameObject spotGo = new($"Tile Spot ({x}-{y})", typeof(TileSpotView));
@@ -167,20 +178,20 @@ namespace Gazeus.DesafioMatch3.Views
                 return;
             }
 
-            SpriteRenderer tile = Instantiate(_tilePrefab);
+            TileView tile = Instantiate(_tilePrefab);
             tile.transform.localScale = Vector3.zero;
-            tile.color = _tilePrefabRepository.TileTypes[tileTypeIndex];
+            tile.SetColor(_tilePrefabRepository.TileTypes[tileTypeIndex]);
 
             tileSpot.SetTile(tile.gameObject);
-            _tiles[y][x] = tile.gameObject;
+            _tiles[y][x] = tile;
         }
 
-        private GameObject[][] CloneTilesGrid()
+        private TileView[][] CloneTilesGrid()
         {
-            GameObject[][] clone = new GameObject[_tiles.Length][];
+            TileView[][] clone = new TileView[_tiles.Length][];
             for (int y = 0; y < _tiles.Length; y++)
             {
-                clone[y] = new GameObject[_tiles[y].Length];
+                clone[y] = new TileView[_tiles[y].Length];
                 Array.Copy(_tiles[y], clone[y], _tiles[y].Length);
             }
             return clone;
@@ -225,7 +236,7 @@ namespace Gazeus.DesafioMatch3.Views
                 if (_tiles[r] == null || col >= _tiles[r].Length || processed[r, col])
                     continue;
 
-                AnimateTile(_tiles[r][col], sequence, currentTime);
+                AnimateTile(_tiles[r][col].gameObject, sequence, currentTime);
                 processed[r, col] = true;
                 hasAnimatedAny = true;
             }
@@ -250,7 +261,7 @@ namespace Gazeus.DesafioMatch3.Views
                 if (processed[row, c])
                     continue;
 
-                AnimateTile(_tiles[row][c], sequence, currentTime);
+                AnimateTile(_tiles[row][c].gameObject, sequence, currentTime);
                 processed[row, c] = true;
                 hasAnimatedAny = true;
             }
