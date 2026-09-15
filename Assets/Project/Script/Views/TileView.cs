@@ -11,16 +11,26 @@ namespace Gazeus.DesafioMatch3.Views
         [SerializeField]
         private SpriteRenderer _background;
 
+        #region Unity
+        private void OnDestroy() => transform.DOKill();
+        #endregion
+
         public void SetColor(Color color) => _background.color = color;
 
-        public void Select() =>
+        public void Select()
+        {
+            transform.DOKill();
             transform
                 .DOPunchScale(Vector3.one * 0.2f, 0.2f)
                 .OnComplete(() => _selectedBorder.enabled = true);
+        }
 
-        public void UnSelect() =>
+        public void UnSelect()
+        {
+            transform.DOKill();
             transform
                 .DOPunchScale(Vector3.one * 0.2f, 0.2f)
                 .OnComplete(() => _selectedBorder.enabled = false);
+        }
     }
 }

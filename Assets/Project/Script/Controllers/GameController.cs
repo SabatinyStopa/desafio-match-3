@@ -47,20 +47,40 @@ namespace Gazeus.DesafioMatch3.Controllers
         private void AnimateBoard(List<BoardSequence> boardSequences, int index, Action onComplete)
         {
             BoardSequence boardSequence = boardSequences[index];
+            float appendInterval = 0.3f;
 
             Sequence sequence = DOTween.Sequence();
-            sequence.Append(_boardView.DestroyTiles(boardSequence.MatchedPosition));
-            sequence.Append(_boardView.MoveTiles(boardSequence.MovedTiles));
-            sequence.Append(_boardView.CreateTile(boardSequence.AddedTiles));
 
-            index += 1;
+            sequence.Append(_boardView.AnimateMatchPosition(boardSequence.MatchedPosition));
+
+            sequence.AppendCallback(() =>
+            {
+                _boardView.DestroyTiles(boardSequence.MatchedPosition);
+            });
+
+            sequence.AppendCallback(() =>
+            {
+                _boardView.MoveTiles(boardSequence.MovedTiles).Play();
+            });
+
+            sequence.AppendInterval(appendInterval);
+
+            sequence.AppendCallback(() =>
+            {
+                _boardView.CreateTile(boardSequence.AddedTiles).Play();
+            });
+
+            sequence.AppendInterval(appendInterval);
+
+            index++;
+
             if (index < boardSequences.Count)
             {
-                sequence.onComplete += () => AnimateBoard(boardSequences, index, onComplete);
+                sequence.OnComplete(() => AnimateBoard(boardSequences, index, onComplete));
             }
             else
             {
-                sequence.onComplete += () => onComplete();
+                sequence.OnComplete(() => onComplete?.Invoke());
             }
         }
 
@@ -71,23 +91,45 @@ namespace Gazeus.DesafioMatch3.Controllers
 
             if (_selectedX > -1 && _selectedY > -1)
             {
-                if (Mathf.Abs(_selectedX - x) + Mathf.Abs(_selectedY - y) > 1)
+                if (_selectedX == x && _selectedY == y)
                 {
+                    _boardView.GetTile(_selectedX, _selectedY).UnSelect();
                     _selectedX = -1;
                     _selectedY = -1;
-                    _boardView.GetTile(x, y).UnSelect();
+                    return;
+                }
+
+                if (Mathf.Abs(_selectedX - x) + Mathf.Abs(_selectedY - y) > 1)
+                {
+                    _boardView.GetTile(_selectedX, _selectedY).UnSelect();
+                    _selectedX = x;
+                    _selectedY = y;
+                    _boardView.GetTile(x, y).Select();
                 }
                 else
                 {
                     _isAnimating = true;
-                    _boardView.SwapTiles(_selectedX, _selectedY, x, y).onComplete += () =>
+
+                    int fromX = _selectedX;
+                    int fromY = _selectedY;
+
+                    _selectedX = -1;
+                    _selectedY = -1;
+
+                    TileView selectedTile = _boardView.GetTile(fromX, fromY);
+                    if (selectedTile != null)
                     {
-                        bool isValid = _gameService.IsValidMovement(_selectedX, _selectedY, x, y);
+                        selectedTile.UnSelect();
+                    }
+
+                    _boardView.SwapTiles(fromX, fromY, x, y).onComplete += () =>
+                    {
+                        bool isValid = _gameService.IsValidMovement(fromX, fromY, x, y);
                         if (isValid)
                         {
                             List<BoardSequence> swapResult = _gameService.SwapTile(
-                                _selectedX,
-                                _selectedY,
+                                fromX,
+                                fromY,
                                 x,
                                 y
                             );
@@ -95,13 +137,17 @@ namespace Gazeus.DesafioMatch3.Controllers
                         }
                         else
                         {
-                            _boardView.SwapTiles(x, y, _selectedX, _selectedY).onComplete += () =>
-                                _isAnimating = false;
-                        }
+                            _boardView.SwapTiles(x, y, fromX, fromY).onComplete += () =>
+                            {
+                                TileView revertedTile = _boardView.GetTile(fromX, fromY);
+                                if (revertedTile != null)
+                                {
+                                    revertedTile.UnSelect();
+                                }
 
-                        _boardView.GetTile(_selectedX, _selectedY).UnSelect();
-                        _selectedX = -1;
-                        _selectedY = -1;
+                                _isAnimating = false;
+                            };
+                        }
                     };
                 }
             }
@@ -109,7 +155,6 @@ namespace Gazeus.DesafioMatch3.Controllers
             {
                 _selectedX = x;
                 _selectedY = y;
-
                 _boardView.GetTile(x, y).Select();
             }
         }

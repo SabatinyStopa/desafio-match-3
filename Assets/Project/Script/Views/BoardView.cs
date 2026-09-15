@@ -74,42 +74,6 @@ namespace Gazeus.DesafioMatch3.Views
             return sequence;
         }
 
-        public Tween DestroyTiles(List<Vector2Int> matchedPositions)
-        {
-            foreach (var pos in matchedPositions)
-            {
-                if (_tiles[pos.y][pos.x] == null)
-                {
-                    continue;
-                }
-
-                Destroy(_tiles[pos.y][pos.x].gameObject);
-                _tiles[pos.y][pos.x] = null;
-            }
-
-            return DOVirtual.DelayedCall(DESTROY_ANIMATION_DELAY, () => { });
-        }
-
-        public Tween MoveTiles(List<MovedTileInfo> movedTiles)
-        {
-            TileView[][] nextTilesState = CloneTilesGrid();
-            Sequence sequence = DOTween.Sequence();
-
-            foreach (var movedTile in movedTiles)
-            {
-                Vector2Int from = movedTile.From;
-                Vector2Int to = movedTile.To;
-
-                sequence.Join(
-                    GetTileSpot(to.x, to.y).AnimateSetTile(_tiles[from.y][from.x].gameObject)
-                );
-                nextTilesState[to.y][to.x] = _tiles[from.y][from.x];
-            }
-
-            _tiles = nextTilesState;
-            return sequence;
-        }
-
         public Tween SwapTiles(int fromX, int fromY, int toX, int toY)
         {
             TileView tileFrom = GetTile(fromX, fromY);
@@ -149,6 +113,75 @@ namespace Gazeus.DesafioMatch3.Views
                 }
             }
 
+            return sequence;
+        }
+
+        public Tween AnimateMatchPosition(List<Vector2Int> matchedPositions)
+        {
+            Sequence sequence = DOTween.Sequence();
+
+            foreach (var pos in matchedPositions)
+            {
+                TileView tile = GetTile(pos.x, pos.y);
+                if (tile == null)
+                    continue;
+
+                tile.transform.DOKill();
+
+                Sequence tileSequence = DOTween.Sequence();
+                tileSequence.Append(
+                    tile.transform.DOShakePosition(0.25f, strength: 0.12f, vibrato: 25)
+                );
+                tileSequence.Append(
+                    tile.transform.DOScale(Vector3.zero, 0.15f).SetEase(Ease.InBack)
+                );
+
+                sequence.Join(tileSequence);
+            }
+
+            return sequence;
+        }
+
+        public void DestroyTiles(List<Vector2Int> matchedPositions)
+        {
+            foreach (var pos in matchedPositions)
+            {
+                if (_tiles[pos.y] == null)
+                    continue;
+
+                TileView tile = _tiles[pos.y][pos.x];
+                if (tile == null)
+                    continue;
+
+                tile.transform.DOKill();
+                Destroy(tile.gameObject);
+                _tiles[pos.y][pos.x] = null;
+            }
+        }
+
+        public Tween MoveTiles(List<MovedTileInfo> movedTiles)
+        {
+            TileView[][] nextTilesState = CloneTilesGrid();
+            Sequence sequence = DOTween.Sequence();
+
+            foreach (var movedTile in movedTiles)
+            {
+                Vector2Int from = movedTile.From;
+                Vector2Int to = movedTile.To;
+
+                TileView tileToMove = _tiles[from.y][from.x];
+
+                if (tileToMove == null)
+                {
+                    continue;
+                }
+
+                sequence.Join(GetTileSpot(to.x, to.y).AnimateSetTile(tileToMove.gameObject));
+                nextTilesState[to.y][to.x] = tileToMove;
+                nextTilesState[from.y][from.x] = null;
+            }
+
+            _tiles = nextTilesState;
             return sequence;
         }
 
