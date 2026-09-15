@@ -1,3 +1,4 @@
+using DG.Tweening;
 using UnityEngine;
 
 namespace Gazeus.DesafioMatch3.Views
@@ -12,8 +13,14 @@ namespace Gazeus.DesafioMatch3.Views
 
         public void SetColor(Color color) => _background.color = color;
 
-        public void Select() => _selectedBorder.enabled = true;
+        public void Select() =>
+            transform
+                .DOPunchScale(Vector3.one * 0.2f, 0.2f)
+                .OnComplete(() => _selectedBorder.enabled = true);
 
-        public void UnSelect() => _selectedBorder.enabled = false;
+        public void UnSelect() =>
+            transform
+                .DOPunchScale(Vector3.one * 0.2f, 0.2f)
+                .OnComplete(() => _selectedBorder.enabled = false);
     }
 }
