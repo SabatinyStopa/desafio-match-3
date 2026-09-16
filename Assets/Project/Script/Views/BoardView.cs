@@ -16,7 +16,6 @@ namespace Gazeus.DesafioMatch3.Views
         private const float TILE_SPACING = 1.3f;
         private const float TILE_APPEAR_INTERVAL_DURATION = 0.1f;
         private const float ANIMATION_DURATION = 0.5f;
-        private const float DESTROY_ANIMATION_DELAY = 0.2f;
         private const float SCALE_PHASE_RATIO = 0.7f;
         private const float PUNCH_PHASE_RATIO = 0.3f;
         private static readonly Vector3 PUNCH_STRENGTH = new(0.2f, 0.2f, 0.2f);
@@ -34,18 +33,24 @@ namespace Gazeus.DesafioMatch3.Views
         [SerializeField]
         private ExplosionEffectView[] _explosionsPrefabs;
 
+        private ObjectPool<TileView> _tilePool;
         private ObjectPool<ExplosionEffectView>[] _explosionPools;
         private TileView[][] _tiles;
         private TileSpotView[][] _tileSpots;
 
         #region Unity
-        private void Start()
+        private void Awake()
         {
+            _tilePool = new ObjectPool<TileView>(_tilePrefab, 100, _boardContainer);
             _explosionPools = new ObjectPool<ExplosionEffectView>[_explosionsPrefabs.Length];
 
             for (int i = 0; i < _explosionPools.Length; i++)
             {
-                _explosionPools[i] = new ObjectPool<ExplosionEffectView>(_explosionsPrefabs[i], 10);
+                _explosionPools[i] = new ObjectPool<ExplosionEffectView>(
+                    _explosionsPrefabs[i],
+                    10,
+                    transform
+                );
             }
         }
 
@@ -78,11 +83,7 @@ namespace Gazeus.DesafioMatch3.Views
             foreach (var addedTile in addedTiles)
             {
                 Vector2Int pos = addedTile.Position;
-                TileView tile = Instantiate(_tilePrefab);
-
-                tile.SetColor(_tilePrefabRepository.TileTypes[addedTile.Type]);
-                tile.SetType(addedTile.Type);
-                tile.transform.localScale = Vector3.zero;
+                TileView tile = SetupTile(addedTile.Type);
 
                 _tileSpots[pos.y][pos.x].SetTile(tile.gameObject);
                 _tiles[pos.y][pos.x] = tile;
@@ -143,7 +144,9 @@ namespace Gazeus.DesafioMatch3.Views
             {
                 TileView tile = GetTile(pos.x, pos.y);
                 if (tile == null)
+                {
                     continue;
+                }
 
                 tile.transform.DOKill();
 
@@ -187,7 +190,7 @@ namespace Gazeus.DesafioMatch3.Views
                 });
 
                 tile.transform.DOKill();
-                Destroy(tile.gameObject);
+                _tilePool.Release(tile);
                 _tiles[pos.y][pos.x] = null;
             }
         }
@@ -222,6 +225,16 @@ namespace Gazeus.DesafioMatch3.Views
 
         public TileView GetTile(int x, int y) => _tiles[y][x];
 
+        private TileView SetupTile(int typeIndex)
+        {
+            return _tilePool.Get(tile =>
+            {
+                tile.transform.localScale = Vector3.zero;
+                tile.SetColor(_tilePrefabRepository.TileTypes[typeIndex]);
+                tile.SetType(typeIndex);
+            });
+        }
+
         private void CreateTileSpotAndTile(List<List<Tile>> board, int x, int y)
         {
             GameObject spotGo = new($"Tile Spot ({x}-{y})", typeof(TileSpotView));
@@ -244,11 +257,7 @@ namespace Gazeus.DesafioMatch3.Views
                 return;
             }
 
-            TileView tile = Instantiate(_tilePrefab);
-            tile.transform.localScale = Vector3.zero;
-            tile.SetColor(_tilePrefabRepository.TileTypes[tileTypeIndex]);
-            tile.SetType(tileTypeIndex);
-
+            TileView tile = SetupTile(tileTypeIndex);
             tileSpot.SetTile(tile.gameObject);
             _tiles[y][x] = tile;
         }
