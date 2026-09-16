@@ -119,7 +119,7 @@ namespace Gazeus.DesafioMatch3.Controllers
                     TileView selectedTile = _boardView.GetTile(fromX, fromY);
                     if (selectedTile != null)
                     {
-                        selectedTile.UnSelect();
+                        selectedTile.UnSelectImmediate();
                     }
 
                     _boardView.SwapTiles(fromX, fromY, x, y).onComplete += () =>

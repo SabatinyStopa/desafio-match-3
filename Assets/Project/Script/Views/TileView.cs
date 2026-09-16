@@ -35,6 +35,8 @@ namespace Gazeus.DesafioMatch3.Views
                 .OnComplete(() => _selectedBorder.enabled = false);
         }
 
+        public void UnSelectImmediate() => _selectedBorder.enabled = false;
+
         public void SetType(int type) => _currentType = type;
 
         public int GetCurrentType() => _currentType;
