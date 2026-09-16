@@ -166,6 +166,11 @@ MonoBehaviour:
   _boardContainer: {fileID: 1708812983}
   _tilePrefabRepository: {fileID: 11400000, guid: 153eac3747f207a40add49ed6e2dacb9, type: 2}
   _tilePrefab: {fileID: -6887417897539379301, guid: 946fcb524dc9e2b44bd69a6c88d26117, type: 3}
+  _explosionsPrefabs:
+  - {fileID: 5712392834174165241, guid: 4d6bbe5a2c20be04b8b6aed774fd54d0, type: 3}
+  - {fileID: 5712392834174165241, guid: 38ea259bc99a87d4f8c07fb7ac16040e, type: 3}
+  - {fileID: 5712392834174165241, guid: 401159fabb421624abcfd05c9181a6fb, type: 3}
+  - {fileID: 5712392834174165241, guid: b3d98f1baeb691e47a31dcd801d61647, type: 3}
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -252,13 +257,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 519420028}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 1, w: 0}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 5, y: 5, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 180}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &519420033
 MonoBehaviour:
   m_ObjectHideFlags: 0
