@@ -4,10 +4,6 @@ using UnityEngine;
 
 namespace Gazeus.DesafioMatch3.Utilities
 {
-    /// <summary>
-    /// A Pool of T objects to have prewarmed and instantiated objects of type T
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
     public class ObjectPool<T>
         where T : Component
     {
@@ -32,18 +28,10 @@ namespace Gazeus.DesafioMatch3.Utilities
             });
         }
 
-        public T Get(Action<T> setup)
+        public T Get(Action<T> setup = null)
         {
-            T instance;
-
-            if (_availableObjects.Count > 0)
-            {
-                instance = _availableObjects.Dequeue();
-            }
-            else
-            {
-                instance = CreateInstance();
-            }
+            T instance =
+                _availableObjects.Count > 0 ? _availableObjects.Dequeue() : CreateInstance();
 
             _activeObjects.Add(instance);
 
