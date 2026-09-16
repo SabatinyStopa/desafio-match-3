@@ -7,9 +7,6 @@ namespace Gazeus.DesafioMatch3.Views
     public class ExplosionEffectView : MonoBehaviour
     {
         [SerializeField]
-        private ParticleSystem[] _particlesToChangeColor;
-
-        [SerializeField]
         private ParticleSystem[] _particles;
 
         public void Play(Action onComplete)
