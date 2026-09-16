@@ -35,8 +35,8 @@ namespace Gazeus.DesafioMatch3.Views
 
         private ObjectPool<TileView> _tilePool;
         private ObjectPool<ExplosionEffectView>[] _explosionPools;
-        private TileView[][] _tiles;
-        private TileSpotView[][] _tileSpots;
+        private TileView[,] _tiles;
+        private TileSpotView[,] _tileSpots;
 
         #region Unity
         private void Awake()
@@ -53,7 +53,6 @@ namespace Gazeus.DesafioMatch3.Views
                 );
             }
         }
-
         #endregion
 
         public void CreateBoard(List<List<Tile>> board)
@@ -61,14 +60,11 @@ namespace Gazeus.DesafioMatch3.Views
             int rowCount = board.Count;
             int colCount = board[0].Count;
 
-            _tiles = new TileView[rowCount][];
-            _tileSpots = new TileSpotView[rowCount][];
+            _tiles = new TileView[rowCount, colCount];
+            _tileSpots = new TileSpotView[rowCount, colCount];
 
             for (int y = 0; y < rowCount; y++)
             {
-                _tiles[y] = new TileView[colCount];
-                _tileSpots[y] = new TileSpotView[colCount];
-
                 for (int x = 0; x < colCount; x++)
                 {
                     CreateTileSpotAndTile(board, x, y);
@@ -85,8 +81,8 @@ namespace Gazeus.DesafioMatch3.Views
                 Vector2Int pos = addedTile.Position;
                 TileView tile = SetupTile(addedTile.Type);
 
-                _tileSpots[pos.y][pos.x].SetTile(tile.gameObject);
-                _tiles[pos.y][pos.x] = tile;
+                _tileSpots[pos.y, pos.x].SetTile(tile.gameObject);
+                _tiles[pos.y, pos.x] = tile;
 
                 sequence.Join(tile.transform.DOScale(Vector3.one, ANIMATION_DURATION));
             }
@@ -103,8 +99,8 @@ namespace Gazeus.DesafioMatch3.Views
             sequence.Append(GetTileSpot(fromX, fromY).AnimateSetTile(tileTo.gameObject));
             sequence.Join(GetTileSpot(toX, toY).AnimateSetTile(tileFrom.gameObject));
 
-            _tiles[toY][toX] = tileFrom;
-            _tiles[fromY][fromX] = tileTo;
+            _tiles[toY, toX] = tileFrom;
+            _tiles[fromY, fromX] = tileTo;
 
             return sequence;
         }
@@ -118,8 +114,8 @@ namespace Gazeus.DesafioMatch3.Views
                 return sequence;
             }
 
-            int numRows = _tiles.Length;
-            int numCols = _tiles[0].Length;
+            int numRows = _tiles.GetLength(0);
+            int numCols = _tiles.GetLength(1);
             bool[,] processed = new bool[numRows, numCols];
 
             float currentTime = 0f;
@@ -149,16 +145,8 @@ namespace Gazeus.DesafioMatch3.Views
                 }
 
                 tile.transform.DOKill();
-
-                Sequence tileSequence = DOTween.Sequence();
-                tileSequence.Append(
-                    tile.transform.DOShakePosition(0.25f, strength: 0.12f, vibrato: 25)
-                );
-                tileSequence.Append(
-                    tile.transform.DOScale(Vector3.zero, 0.15f).SetEase(Ease.InBack)
-                );
-
-                sequence.Join(tileSequence);
+                sequence.Join(tile.transform.DOShakePosition(0.25f, strength: 0.12f, vibrato: 25));
+                sequence.Join(tile.transform.DOScale(Vector3.zero, 0.15f).SetEase(Ease.InBack));
             }
 
             return sequence;
@@ -168,13 +156,7 @@ namespace Gazeus.DesafioMatch3.Views
         {
             foreach (var pos in matchedPositions)
             {
-                if (_tiles[pos.y] == null)
-                {
-                    continue;
-                }
-
-                TileView tile = _tiles[pos.y][pos.x];
-
+                TileView tile = _tiles[pos.y, pos.x];
                 if (tile == null)
                 {
                     continue;
@@ -191,13 +173,12 @@ namespace Gazeus.DesafioMatch3.Views
 
                 tile.transform.DOKill();
                 _tilePool.Release(tile);
-                _tiles[pos.y][pos.x] = null;
+                _tiles[pos.y, pos.x] = null;
             }
         }
 
         public Tween MoveTiles(List<MovedTileInfo> movedTiles)
         {
-            TileView[][] nextTilesState = CloneTilesGrid();
             Sequence sequence = DOTween.Sequence();
 
             foreach (var movedTile in movedTiles)
@@ -205,25 +186,23 @@ namespace Gazeus.DesafioMatch3.Views
                 Vector2Int from = movedTile.From;
                 Vector2Int to = movedTile.To;
 
-                TileView tileToMove = _tiles[from.y][from.x];
-
+                TileView tileToMove = _tiles[from.y, from.x];
                 if (tileToMove == null)
                 {
                     continue;
                 }
 
                 sequence.Join(GetTileSpot(to.x, to.y).AnimateSetTile(tileToMove.gameObject));
-                nextTilesState[to.y][to.x] = tileToMove;
-                nextTilesState[from.y][from.x] = null;
+                _tiles[to.y, to.x] = tileToMove;
+                _tiles[from.y, from.x] = null;
             }
 
-            _tiles = nextTilesState;
             return sequence;
         }
 
-        public TileSpotView GetTileSpot(int x, int y) => _tileSpots[y][x];
+        public TileSpotView GetTileSpot(int x, int y) => _tileSpots[y, x];
 
-        public TileView GetTile(int x, int y) => _tiles[y][x];
+        public TileView GetTile(int x, int y) => _tiles[y, x];
 
         private TileView SetupTile(int typeIndex)
         {
@@ -248,7 +227,7 @@ namespace Gazeus.DesafioMatch3.Views
 
             tileSpot.SetPosition(x, y);
             tileSpot.Clicked += TileSpot_Clicked;
-            _tileSpots[y][x] = tileSpot;
+            _tileSpots[y, x] = tileSpot;
 
             int tileTypeIndex = board[y][x].Type;
             if (tileTypeIndex < 0)
@@ -259,21 +238,10 @@ namespace Gazeus.DesafioMatch3.Views
 
             TileView tile = SetupTile(tileTypeIndex);
             tileSpot.SetTile(tile.gameObject);
-            _tiles[y][x] = tile;
+            _tiles[y, x] = tile;
         }
 
-        private TileView[][] CloneTilesGrid()
-        {
-            TileView[][] clone = new TileView[_tiles.Length][];
-            for (int y = 0; y < _tiles.Length; y++)
-            {
-                clone[y] = new TileView[_tiles[y].Length];
-                Array.Copy(_tiles[y], clone[y], _tiles[y].Length);
-            }
-            return clone;
-        }
-
-        private bool IsBoardInvalid() => _tiles == null || _tiles.Length == 0 || _tiles[0] == null;
+        private bool IsBoardInvalid() => _tiles == null || _tiles.GetLength(0) == 0;
 
         private bool EnqueueStepAnimations(
             int step,
@@ -309,12 +277,12 @@ namespace Gazeus.DesafioMatch3.Views
 
             for (int r = 0; r < numRows; r++)
             {
-                if (_tiles[r] == null || col >= _tiles[r].Length || processed[r, col])
+                if (processed[r, col] || _tiles[r, col] == null)
                 {
                     continue;
                 }
 
-                AnimateTile(_tiles[r][col].gameObject, sequence, currentTime);
+                AnimateTile(_tiles[r, col].gameObject, sequence, currentTime);
                 processed[r, col] = true;
                 hasAnimatedAny = true;
             }
@@ -329,19 +297,17 @@ namespace Gazeus.DesafioMatch3.Views
             float currentTime
         )
         {
-            if (_tiles[row] == null)
-                return false;
-
             bool hasAnimatedAny = false;
+            int numCols = _tiles.GetLength(1);
 
-            for (int c = 0; c < _tiles[row].Length; c++)
+            for (int c = 0; c < numCols; c++)
             {
-                if (processed[row, c])
+                if (processed[row, c] || _tiles[row, c] == null)
                 {
                     continue;
                 }
 
-                AnimateTile(_tiles[row][c].gameObject, sequence, currentTime);
+                AnimateTile(_tiles[row, c].gameObject, sequence, currentTime);
                 processed[row, c] = true;
                 hasAnimatedAny = true;
             }
@@ -358,11 +324,12 @@ namespace Gazeus.DesafioMatch3.Views
 
             tile.transform.localScale = Vector3.zero;
 
-            Sequence tileSequence = DOTween.Sequence();
-            tileSequence.Append(
+            mainSequence.Insert(
+                atTime,
                 tile.transform.DOScale(Vector3.one, ANIMATION_DURATION * SCALE_PHASE_RATIO)
             );
-            tileSequence.Append(
+            mainSequence.Insert(
+                atTime + (ANIMATION_DURATION * SCALE_PHASE_RATIO),
                 tile.transform.DOPunchScale(
                     PUNCH_STRENGTH,
                     ANIMATION_DURATION * PUNCH_PHASE_RATIO,
@@ -370,8 +337,6 @@ namespace Gazeus.DesafioMatch3.Views
                     0.5f
                 )
             );
-
-            mainSequence.Insert(atTime, tileSequence);
         }
 
         #region Events
