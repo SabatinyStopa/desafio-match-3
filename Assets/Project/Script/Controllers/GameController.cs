@@ -47,7 +47,9 @@ namespace Gazeus.DesafioMatch3.Controllers
         private void OnTileClick(int x, int y)
         {
             if (_isAnimating)
+            {
                 return;
+            }
 
             if (HasSelectedTile())
             {
