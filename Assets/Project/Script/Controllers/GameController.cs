@@ -44,8 +44,112 @@ namespace Gazeus.DesafioMatch3.Controllers
         }
         #endregion
 
+        private void OnTileClick(int x, int y)
+        {
+            if (_isAnimating)
+                return;
+
+            if (HasSelectedTile())
+            {
+                HandleSecondTileSelection(x, y);
+            }
+            else
+            {
+                SelectTile(x, y);
+            }
+        }
+
+        private bool HasSelectedTile() => _selectedX > -1 && _selectedY > -1;
+
+        private bool IsSameTile(int x, int y) => _selectedX == x && _selectedY == y;
+
+        private bool IsAdjacentTile(int x, int y) =>
+            Mathf.Abs(_selectedX - x) + Mathf.Abs(_selectedY - y) == 1;
+
+        private void SelectTile(int x, int y)
+        {
+            _selectedX = x;
+            _selectedY = y;
+            _boardView.GetTile(x, y)?.Select();
+        }
+
+        private void UnselectCurrentTile()
+        {
+            if (HasSelectedTile())
+            {
+                _boardView.GetTile(_selectedX, _selectedY)?.UnSelect();
+                ResetSelection();
+            }
+        }
+
+        private void ResetSelection()
+        {
+            _selectedX = -1;
+            _selectedY = -1;
+        }
+
+        private void HandleSecondTileSelection(int targetX, int targetY)
+        {
+            if (IsSameTile(targetX, targetY))
+            {
+                UnselectCurrentTile();
+                return;
+            }
+
+            if (!IsAdjacentTile(targetX, targetY))
+            {
+                UnselectCurrentTile();
+                SelectTile(targetX, targetY);
+                return;
+            }
+
+            ExecuteSwapSequence(_selectedX, _selectedY, targetX, targetY);
+        }
+
+        private void ExecuteSwapSequence(int fromX, int fromY, int toX, int toY)
+        {
+            _isAnimating = true;
+
+            TileView selectedTile = _boardView.GetTile(fromX, fromY);
+            selectedTile?.UnSelectImmediate();
+            ResetSelection();
+
+            _boardView.SwapTiles(fromX, fromY, toX, toY).onComplete += () =>
+            {
+                ProcessSwapResult(fromX, fromY, toX, toY);
+            };
+        }
+
+        private void ProcessSwapResult(int fromX, int fromY, int toX, int toY)
+        {
+            if (_gameService.IsValidMovement(fromX, fromY, toX, toY))
+            {
+                List<BoardSequence> swapResult = _gameService.SwapTile(fromX, fromY, toX, toY);
+                AnimateBoard(swapResult, 0, () => _isAnimating = false);
+            }
+            else
+            {
+                RevertSwap(fromX, fromY, toX, toY);
+            }
+        }
+
+        private void RevertSwap(int fromX, int fromY, int toX, int toY)
+        {
+            _boardView.SwapTiles(toX, toY, fromX, fromY).onComplete += () =>
+            {
+                _boardView.GetTile(fromX, fromY)?.UnSelect();
+                _isAnimating = false;
+            };
+        }
+
         private void AnimateBoard(List<BoardSequence> boardSequences, int index, Action onComplete)
         {
+            if (boardSequences == null || index >= boardSequences.Count)
+            {
+                onComplete?.Invoke();
+                return;
+            }
+
             BoardSequence boardSequence = boardSequences[index];
             float appendInterval = 0.3f;
 
@@ -81,81 +185,6 @@ namespace Gazeus.DesafioMatch3.Controllers
             else
             {
                 sequence.OnComplete(() => onComplete?.Invoke());
-            }
-        }
-
-        private void OnTileClick(int x, int y)
-        {
-            if (_isAnimating)
-                return;
-
-            if (_selectedX > -1 && _selectedY > -1)
-            {
-                if (_selectedX == x && _selectedY == y)
-                {
-                    _boardView.GetTile(_selectedX, _selectedY).UnSelect();
-                    _selectedX = -1;
-                    _selectedY = -1;
-                    return;
-                }
-
-                if (Mathf.Abs(_selectedX - x) + Mathf.Abs(_selectedY - y) > 1)
-                {
-                    _boardView.GetTile(_selectedX, _selectedY).UnSelect();
-                    _selectedX = x;
-                    _selectedY = y;
-                    _boardView.GetTile(x, y).Select();
-                }
-                else
-                {
-                    _isAnimating = true;
-
-                    int fromX = _selectedX;
-                    int fromY = _selectedY;
-
-                    _selectedX = -1;
-                    _selectedY = -1;
-
-                    TileView selectedTile = _boardView.GetTile(fromX, fromY);
-                    if (selectedTile != null)
-                    {
-                        selectedTile.UnSelectImmediate();
-                    }
-
-                    _boardView.SwapTiles(fromX, fromY, x, y).onComplete += () =>
-                    {
-                        bool isValid = _gameService.IsValidMovement(fromX, fromY, x, y);
-                        if (isValid)
-                        {
-                            List<BoardSequence> swapResult = _gameService.SwapTile(
-                                fromX,
-                                fromY,
-                                x,
-                                y
-                            );
-                            AnimateBoard(swapResult, 0, () => _isAnimating = false);
-                        }
-                        else
-                        {
-                            _boardView.SwapTiles(x, y, fromX, fromY).onComplete += () =>
-                            {
-                                TileView revertedTile = _boardView.GetTile(fromX, fromY);
-                                if (revertedTile != null)
-                                {
-                                    revertedTile.UnSelect();
-                                }
-
-                                _isAnimating = false;
-                            };
-                        }
-                    };
-                }
-            }
-            else
-            {
-                _selectedX = x;
-                _selectedY = y;
-                _boardView.GetTile(x, y).Select();
             }
         }
     }

@@ -166,11 +166,16 @@ namespace Gazeus.DesafioMatch3.Views
             foreach (var pos in matchedPositions)
             {
                 if (_tiles[pos.y] == null)
+                {
                     continue;
+                }
 
                 TileView tile = _tiles[pos.y][pos.x];
+
                 if (tile == null)
+                {
                     continue;
+                }
 
                 int index = tile.GetCurrentType();
                 ExplosionEffectView explosionEffect = _explosionPools[index]
@@ -296,7 +301,9 @@ namespace Gazeus.DesafioMatch3.Views
             for (int r = 0; r < numRows; r++)
             {
                 if (_tiles[r] == null || col >= _tiles[r].Length || processed[r, col])
+                {
                     continue;
+                }
 
                 AnimateTile(_tiles[r][col].gameObject, sequence, currentTime);
                 processed[r, col] = true;
@@ -321,7 +328,9 @@ namespace Gazeus.DesafioMatch3.Views
             for (int c = 0; c < _tiles[row].Length; c++)
             {
                 if (processed[row, c])
+                {
                     continue;
+                }
 
                 AnimateTile(_tiles[row][c].gameObject, sequence, currentTime);
                 processed[row, c] = true;
