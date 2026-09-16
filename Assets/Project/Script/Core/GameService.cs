@@ -92,6 +92,8 @@ namespace Gazeus.DesafioMatch3.Core
                         MatchedPosition = matchedList,
                         MovedTiles = movedTiles,
                         AddedTiles = addedTiles,
+                        MatchType = matchType,
+                        MatchCount = matchedList.Count,
                     }
                 );
             }
@@ -374,7 +376,9 @@ namespace Gazeus.DesafioMatch3.Core
                 for (int x = 0; x < _columns; x++)
                 {
                     if (matchGrid[y, x])
+                    {
                         positions.Add(new Vector2Int(x, y));
+                    }
                 }
             }
             return positions;

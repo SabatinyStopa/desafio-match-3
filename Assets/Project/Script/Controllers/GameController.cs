@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using DG.Tweening;
 using Gazeus.DesafioMatch3.Core;
 using Gazeus.DesafioMatch3.Models;
+using Gazeus.DesafioMatch3.UI;
 using Gazeus.DesafioMatch3.Views;
 using UnityEngine;
 
@@ -14,12 +15,16 @@ namespace Gazeus.DesafioMatch3.Controllers
         private BoardView _boardView;
 
         [SerializeField]
+        private UIScore _score;
+
+        [SerializeField]
         private int _boardHeight = 10;
 
         [SerializeField]
         private int _boardWidth = 10;
 
         private GameService _gameService;
+        private ScoreController _scoreController;
         private bool _isAnimating;
         private int _selectedX = -1;
         private int _selectedY = -1;
@@ -28,12 +33,16 @@ namespace Gazeus.DesafioMatch3.Controllers
         private void Awake()
         {
             _gameService = new GameService();
+            _scoreController = new ScoreController();
             _boardView.TileClicked += OnTileClick;
+
+            _scoreController.OnScoreUpdated += _score.UpdateScore;
         }
 
         private void OnDestroy()
         {
             _boardView.TileClicked -= OnTileClick;
+            _scoreController.OnScoreUpdated -= _score.UpdateScore;
         }
 
         private void Start()
@@ -105,10 +114,10 @@ namespace Gazeus.DesafioMatch3.Controllers
                 return;
             }
 
-            ExecuteSwapSequence(_selectedX, _selectedY, targetX, targetY);
+            ExecuteMove(_selectedX, _selectedY, targetX, targetY);
         }
 
-        private void ExecuteSwapSequence(int fromX, int fromY, int toX, int toY)
+        private void ExecuteMove(int fromX, int fromY, int toX, int toY)
         {
             _isAnimating = true;
 
@@ -118,20 +127,31 @@ namespace Gazeus.DesafioMatch3.Controllers
 
             _boardView.SwapTiles(fromX, fromY, toX, toY).onComplete += () =>
             {
-                ProcessSwapResult(fromX, fromY, toX, toY);
+                ExecuteMoveResult(fromX, fromY, toX, toY);
             };
         }
 
-        private void ProcessSwapResult(int fromX, int fromY, int toX, int toY)
+        private void ExecuteMoveResult(int fromX, int fromY, int toX, int toY)
         {
             if (_gameService.IsValidMovement(fromX, fromY, toX, toY))
             {
-                List<BoardSequence> swapResult = _gameService.SwapTile(fromX, fromY, toX, toY);
-                AnimateBoard(swapResult, 0, () => _isAnimating = false);
+                List<BoardSequence> sequences = _gameService.SwapTile(fromX, fromY, toX, toY);
+                AnimateBoard(sequences, 0, () => _isAnimating = false);
             }
             else
             {
                 RevertSwap(fromX, fromY, toX, toY);
+            }
+        }
+
+        private void RegisterSequenceScores(List<BoardSequence> sequences)
+        {
+            for (int i = 0; i < sequences.Count; i++)
+            {
+                BoardSequence sequence = sequences[i];
+                int comboLevel = i + 1;
+
+                _scoreController.RegisterMatch(sequence.MatchType, sequence.MatchCount, comboLevel);
             }
         }
 
@@ -158,6 +178,13 @@ namespace Gazeus.DesafioMatch3.Controllers
             Sequence sequence = DOTween.Sequence();
 
             sequence.Append(_boardView.AnimateMatchPosition(boardSequence.MatchedPosition));
+
+            int comboLevel = index + 1;
+            _scoreController.RegisterMatch(
+                boardSequence.MatchType,
+                boardSequence.MatchCount,
+                comboLevel
+            );
 
             sequence.AppendCallback(() =>
             {
