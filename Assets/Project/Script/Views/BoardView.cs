@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using DG.Tweening;
 using Gazeus.DesafioMatch3.Models;
 using Gazeus.DesafioMatch3.ScriptableObjects;
+using Gazeus.DesafioMatch3.Utilities;
 using UnityEngine;
 
 namespace Gazeus.DesafioMatch3.Views
@@ -30,8 +31,25 @@ namespace Gazeus.DesafioMatch3.Views
         [SerializeField]
         private TileView _tilePrefab;
 
+        [SerializeField]
+        private ExplosionEffectView[] _explosionsPrefabs;
+
+        private ObjectPool<ExplosionEffectView>[] _explosionPools;
         private TileView[][] _tiles;
         private TileSpotView[][] _tileSpots;
+
+        #region Unity
+        private void Start()
+        {
+            _explosionPools = new ObjectPool<ExplosionEffectView>[_explosionsPrefabs.Length];
+
+            for (int i = 0; i < _explosionPools.Length; i++)
+            {
+                _explosionPools[i] = new ObjectPool<ExplosionEffectView>(_explosionsPrefabs[i], 10);
+            }
+        }
+
+        #endregion
 
         public void CreateBoard(List<List<Tile>> board)
         {
@@ -63,6 +81,7 @@ namespace Gazeus.DesafioMatch3.Views
                 TileView tile = Instantiate(_tilePrefab);
 
                 tile.SetColor(_tilePrefabRepository.TileTypes[addedTile.Type]);
+                tile.SetType(addedTile.Type);
                 tile.transform.localScale = Vector3.zero;
 
                 _tileSpots[pos.y][pos.x].SetTile(tile.gameObject);
@@ -153,6 +172,15 @@ namespace Gazeus.DesafioMatch3.Views
                 if (tile == null)
                     continue;
 
+                int index = tile.GetCurrentType();
+                ExplosionEffectView explosionEffect = _explosionPools[index]
+                    .Get(tile.transform.position);
+
+                explosionEffect.Play(() =>
+                {
+                    _explosionPools[index].Release(explosionEffect);
+                });
+
                 tile.transform.DOKill();
                 Destroy(tile.gameObject);
                 _tiles[pos.y][pos.x] = null;
@@ -214,6 +242,7 @@ namespace Gazeus.DesafioMatch3.Views
             TileView tile = Instantiate(_tilePrefab);
             tile.transform.localScale = Vector3.zero;
             tile.SetColor(_tilePrefabRepository.TileTypes[tileTypeIndex]);
+            tile.SetType(tileTypeIndex);
 
             tileSpot.SetTile(tile.gameObject);
             _tiles[y][x] = tile;

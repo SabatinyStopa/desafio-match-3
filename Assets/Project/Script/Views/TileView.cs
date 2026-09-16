@@ -11,6 +11,8 @@ namespace Gazeus.DesafioMatch3.Views
         [SerializeField]
         private SpriteRenderer _background;
 
+        private int _currentType;
+
         #region Unity
         private void OnDestroy() => transform.DOKill();
         #endregion
@@ -32,5 +34,9 @@ namespace Gazeus.DesafioMatch3.Views
                 .DOPunchScale(Vector3.one * 0.2f, 0.2f)
                 .OnComplete(() => _selectedBorder.enabled = false);
         }
+
+        public void SetType(int type) => _currentType = type;
+
+        public int GetCurrentType() => _currentType;
     }
 }
