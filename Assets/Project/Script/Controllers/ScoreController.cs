@@ -20,5 +20,11 @@ namespace Gazeus.DesafioMatch3.Controllers
         }
 
         public int GetCurrentScore() => _currentScore;
+
+        public void ResetScore()
+        {
+            _currentScore = 0;
+            OnScoreUpdated?.Invoke(_currentScore);
+        }
     }
 }

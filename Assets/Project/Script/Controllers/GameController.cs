@@ -30,8 +30,12 @@ namespace Gazeus.DesafioMatch3.Controllers
 
         private int _currentMoves = 0;
 
+        private int _currentLevel = 1;
+
         private GameService _gameService;
+
         private ScoreController _scoreController;
+
         private bool _isAnimating;
         private int _selectedX = -1;
         private int _selectedY = -1;
@@ -45,6 +49,7 @@ namespace Gazeus.DesafioMatch3.Controllers
             _boardView.TileClicked += OnTileClick;
 
             _gameUI.SubscribeEvents(_scoreController);
+            _gameUI.SetupRestartButton(RestartGame);
         }
 
         private void OnDestroy()
@@ -59,11 +64,36 @@ namespace Gazeus.DesafioMatch3.Controllers
             _currentMoves = _maxMoves;
             _gameUI.SetTargetScore(_targetScore);
             _gameUI.SetCurrentMoves(_currentMoves);
+            _gameUI.SetLevel(_currentLevel);
+
             List<List<Tile>> board = _gameService.StartGame(_boardWidth, _boardHeight);
             _boardView.CreateBoard(board);
             _boardView.MakeAllTilesPopUp().Play();
         }
         #endregion
+
+        private void RestartGame()
+        {
+            DOTween.KillAll();
+            _isAnimating = false;
+
+            _boardView.DestroyBoard();
+            _gameUI.SetEnableRestartScreen(false);
+
+            ResetSelection();
+            _currentMoves = _maxMoves;
+
+            _scoreController.ResetScore();
+
+            _gameUI.SetTargetScore(_targetScore);
+            _gameUI.SetCurrentMoves(_currentMoves);
+            _gameUI.SetLevel(_currentLevel);
+
+            List<List<Tile>> board = _gameService.StartGame(_boardWidth, _boardHeight);
+            _boardView.CreateBoard(board);
+            _boardView.MakeAllTilesPopUp().Play();
+            SoundController.Play("Click");
+        }
 
         private void OnTileClick(int x, int y)
         {
@@ -177,9 +207,8 @@ namespace Gazeus.DesafioMatch3.Controllers
             }
             else if (_currentMoves <= 0)
             {
-                Debug.Log("Lose");
+                _gameUI.SetEnableRestartScreen(true);
             }
-            
         }
 
         private void AnimateBoard(List<BoardSequence> boardSequences, int index, Action onComplete)

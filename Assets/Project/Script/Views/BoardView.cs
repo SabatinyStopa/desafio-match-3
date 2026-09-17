@@ -136,6 +136,27 @@ namespace Gazeus.DesafioMatch3.Views
             return sequence;
         }
 
+        public void DestroyBoard()
+        {
+            if (_tiles == null)
+            {
+                return;
+            }
+
+            for (int y = 0; y < _tiles.GetLength(1); y++)
+            {
+                for (int x = 0; x < _tiles.GetLength(0); x++)
+                {
+                    if (_tiles[x, y] != null)
+                    {
+                        _tilePool.Release(_tiles[x, y]);
+                    }
+                }
+            }
+
+            _tiles = null;
+        }
+
         public Tween AnimateMatchPosition(List<Vector2Int> matchedPositions)
         {
             Sequence sequence = DOTween.Sequence();
