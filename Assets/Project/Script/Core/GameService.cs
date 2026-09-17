@@ -23,17 +23,6 @@ namespace Gazeus.DesafioMatch3.Core
             return ConvertToListOfLists(_board);
         }
 
-        public bool IsValidMovement(int originX, int originY, int targetX, int targetY)
-        {
-            if (Math.Abs(originX - targetX) + Math.Abs(originY - targetY) != 1)
-                return false;
-
-            Tile[,] simulatedBoard = (Tile[,])_board.Clone();
-            SwapTiles(simulatedBoard, originX, originY, targetX, targetY);
-
-            return HasMatches(simulatedBoard);
-        }
-
         public List<BoardSequence> SwapTile(int originX, int originY, int targetX, int targetY)
         {
             Tile[,] workingBoard = (Tile[,])_board.Clone();
@@ -449,35 +438,6 @@ namespace Gazeus.DesafioMatch3.Core
             }
 
             return addedTiles;
-        }
-
-        private bool HasMatches(Tile[,] board)
-        {
-            for (int y = 0; y < _rows; y++)
-            {
-                for (int x = 0; x < _columns; x++)
-                {
-                    int type = board[y, x].Type;
-                    if (type == -1)
-                        continue;
-
-                    if (x >= 2 && type == board[y, x - 1].Type && type == board[y, x - 2].Type)
-                        return true;
-                    if (y >= 2 && type == board[y - 1, x].Type && type == board[y - 2, x].Type)
-                        return true;
-
-                    if (x < _columns - 1 && y < _rows - 1)
-                    {
-                        if (
-                            type == board[y, x + 1].Type
-                            && type == board[y + 1, x].Type
-                            && type == board[y + 1, x + 1].Type
-                        )
-                            return true;
-                    }
-                }
-            }
-            return false;
         }
 
         private void SwapTiles(Tile[,] board, int originX, int originY, int targetX, int targetY)

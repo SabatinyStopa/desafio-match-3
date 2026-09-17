@@ -9,9 +9,15 @@ namespace Gazeus.DesafioMatch3.UI
         [SerializeField]
         private TextMeshProUGUI _scoreText;
 
+        [SerializeField]
+        private TextMeshProUGUI _targetScoreText;
+
         private float _countDuration = 0.4f;
         private Coroutine _countCoroutine;
         private int _displayedScore;
+
+        public void SetTargetScore(int targetScore) =>
+            _targetScoreText.SetText($"Target: {targetScore}");
 
         public void UpdateScore(int currentScore)
         {

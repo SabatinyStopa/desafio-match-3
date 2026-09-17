@@ -18,5 +18,7 @@ namespace Gazeus.DesafioMatch3.Controllers
 
             OnScoreUpdated?.Invoke(_currentScore);
         }
+
+        public int GetCurrentScore() => _currentScore;
     }
 }

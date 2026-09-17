@@ -15,13 +15,20 @@ namespace Gazeus.DesafioMatch3.Controllers
         private BoardView _boardView;
 
         [SerializeField]
-        private UIScore _score;
+        private UIGame _gameUI;
 
         [SerializeField]
         private int _boardHeight = 10;
 
         [SerializeField]
         private int _boardWidth = 10;
+
+        [SerializeField]
+        private int _targetScore = 1000;
+
+        private int _maxMoves = 15;
+
+        private int _currentMoves = 0;
 
         private GameService _gameService;
         private ScoreController _scoreController;
@@ -37,17 +44,21 @@ namespace Gazeus.DesafioMatch3.Controllers
             _scoreController = new ScoreController();
             _boardView.TileClicked += OnTileClick;
 
-            _scoreController.OnScoreUpdated += _score.UpdateScore;
+            _gameUI.SubscribeEvents(_scoreController);
         }
 
         private void OnDestroy()
         {
             _boardView.TileClicked -= OnTileClick;
-            _scoreController.OnScoreUpdated -= _score.UpdateScore;
+
+            _gameUI.UnsubscribeEvents(_scoreController);
         }
 
         private void Start()
         {
+            _currentMoves = _maxMoves;
+            _gameUI.SetTargetScore(_targetScore);
+            _gameUI.SetCurrentMoves(_currentMoves);
             List<List<Tile>> board = _gameService.StartGame(_boardWidth, _boardHeight);
             _boardView.CreateBoard(board);
             _boardView.MakeAllTilesPopUp().Play();
@@ -56,7 +67,7 @@ namespace Gazeus.DesafioMatch3.Controllers
 
         private void OnTileClick(int x, int y)
         {
-            if (_isAnimating)
+            if (_isAnimating || _currentMoves <= 0)
             {
                 return;
             }
@@ -123,6 +134,8 @@ namespace Gazeus.DesafioMatch3.Controllers
         {
             _isAnimating = true;
 
+            _currentMoves--;
+            _gameUI.SetCurrentMoves(_currentMoves);
             TileView selectedTile = _boardView.GetTile(fromX, fromY);
             selectedTile?.UnSelectImmediate();
             ResetSelection();
@@ -135,24 +148,38 @@ namespace Gazeus.DesafioMatch3.Controllers
 
         private void ExecuteMoveResult(int fromX, int fromY, int toX, int toY)
         {
-            if (_gameService.IsValidMovement(fromX, fromY, toX, toY))
+            List<BoardSequence> sequences = _gameService.SwapTile(fromX, fromY, toX, toY);
+
+            if (sequences != null && sequences.Count > 0)
             {
-                List<BoardSequence> sequences = _gameService.SwapTile(fromX, fromY, toX, toY);
-                AnimateBoard(sequences, 0, () => _isAnimating = false);
+                AnimateBoard(
+                    sequences,
+                    0,
+                    () =>
+                    {
+                        _isAnimating = false;
+                        TryToGameOver();
+                    }
+                );
             }
             else
             {
-                RevertSwap(fromX, fromY, toX, toY);
+                _isAnimating = false;
+                TryToGameOver();
             }
         }
 
-        private void RevertSwap(int fromX, int fromY, int toX, int toY)
+        private void TryToGameOver()
         {
-            _boardView.SwapTiles(toX, toY, fromX, fromY).onComplete += () =>
+            if (_scoreController.GetCurrentScore() >= _targetScore)
             {
-                _boardView.GetTile(fromX, fromY)?.UnSelect();
-                _isAnimating = false;
-            };
+                Debug.Log("Win!");
+            }
+            else if (_currentMoves <= 0)
+            {
+                Debug.Log("Lose");
+            }
+            
         }
 
         private void AnimateBoard(List<BoardSequence> boardSequences, int index, Action onComplete)
