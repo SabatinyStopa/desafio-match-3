@@ -230,7 +230,8 @@ namespace Gazeus.DesafioMatch3.Controllers
             _scoreController.RegisterMatch(
                 boardSequence.MatchType,
                 boardSequence.MatchCount,
-                comboLevel
+                comboLevel,
+                boardSequence.ResolveType
             );
 
             sequence.AppendCallback(() => _boardView.DestroyTiles(boardSequence.MatchedPosition));

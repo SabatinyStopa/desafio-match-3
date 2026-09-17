@@ -50,13 +50,16 @@ namespace Gazeus.DesafioMatch3.Core
                     matchType
                 );
                 bool isSquare = HasSquarePattern(matchedPositions);
+                ResolveType resolveType = ResolveType.Simple;
 
                 if (maxLineCount >= 5)
                 {
+                    resolveType = ResolveType.FiveSequence;
                     ClearSingleAxis(matchedPositions, actionPivot);
                 }
                 else if (maxLineCount == 4)
                 {
+                    resolveType = ResolveType.FourSequence;
                     ClearMatchingTypeOnDominantAxis(
                         workingBoard,
                         matchedPositions,
@@ -66,6 +69,7 @@ namespace Gazeus.DesafioMatch3.Core
                 }
                 else if (isSquare)
                 {
+                    resolveType = ResolveType.Square;
                     ExpandExplosionArea(matchedPositions, actionPivot, 3, 3);
                 }
 
@@ -83,6 +87,7 @@ namespace Gazeus.DesafioMatch3.Core
                         AddedTiles = addedTiles,
                         MatchType = matchType,
                         MatchCount = matchedList.Count,
+                        ResolveType = resolveType,
                     }
                 );
             }
