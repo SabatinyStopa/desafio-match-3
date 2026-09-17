@@ -34,7 +34,7 @@ namespace Gazeus.DesafioMatch3.UI
         public void SetEnableRestartScreen(bool active) => _gameOverCanvas.enabled = active;
 
         public void SetCurrentMoves(int movesQuantity) =>
-            _currentMovesText.SetText($"Moves: {movesQuantity}");
+            _currentMovesText.SetText($"Movimentos: {movesQuantity}");
 
         public void SubscribeEvents(ScoreController scoreController) =>
             scoreController.OnScoreUpdated += _score.UpdateScore;
@@ -42,7 +42,7 @@ namespace Gazeus.DesafioMatch3.UI
         public void UnsubscribeEvents(ScoreController scoreController) =>
             scoreController.OnScoreUpdated -= _score.UpdateScore;
 
-        public void SetLevel(int level) => _levelText.SetText($"Level: {level}");
+        public void SetLevel(int level) => _levelText.SetText($"Nível: {level}");
 
         public void SetTargetScore(int targetScore) => _score.SetTargetScore(targetScore);
     }

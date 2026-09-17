@@ -36,7 +36,7 @@ namespace Gazeus.DesafioMatch3.UI
         }
 
         public void SetTargetScore(int targetScore) =>
-            _targetScoreText.SetText($"Target: {targetScore}");
+            _targetScoreText.SetText($"Objetivo pts: {targetScore}");
 
         public void UpdateScore(
             int currentScore,
@@ -74,13 +74,13 @@ namespace Gazeus.DesafioMatch3.UI
                 float progress = elapsedTime / _countDuration;
 
                 _displayedScore = Mathf.RoundToInt(Mathf.Lerp(startScore, targetScore, progress));
-                _scoreText.SetText($"Score: {_displayedScore}");
+                _scoreText.SetText($"Pts: {_displayedScore}");
 
                 yield return null;
             }
 
             _displayedScore = targetScore;
-            _scoreText.SetText($"Score: {targetScore}");
+            _scoreText.SetText($"Pts: {targetScore}");
             _countCoroutine = null;
         }
 
