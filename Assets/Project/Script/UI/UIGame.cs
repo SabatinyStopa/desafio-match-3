@@ -1,4 +1,6 @@
+using System;
 using Gazeus.DesafioMatch3.Controllers;
+using Gazeus.DesafioMatch3.UI.Buff;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -9,6 +11,9 @@ namespace Gazeus.DesafioMatch3.UI
     {
         [SerializeField]
         private UIScore _score;
+
+        [SerializeField]
+        private UIBuffSelection _buffSelection;
 
         [SerializeField]
         private TextMeshProUGUI _currentMovesText;
@@ -30,6 +35,8 @@ namespace Gazeus.DesafioMatch3.UI
                 _restartButton.onClick.AddListener(action);
             }
         }
+
+        public void OpenBuffSelection(BuffController buffController, Action onChooseBuff) => _buffSelection.OpenSelectionData(buffController, onChooseBuff);
 
         public void SetEnableRestartScreen(bool active) => _gameOverCanvas.enabled = active;
 

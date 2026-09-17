@@ -23,7 +23,6 @@ namespace Gazeus.DesafioMatch3.Controllers
         [SerializeField]
         private int _boardWidth = 10;
 
-        [SerializeField]
         private int _targetScore = 1000;
 
         private int _maxMoves = 15;
@@ -36,6 +35,8 @@ namespace Gazeus.DesafioMatch3.Controllers
 
         private ScoreController _scoreController;
 
+        private BuffController _buffController;
+
         private bool _isAnimating;
         private int _selectedX = -1;
         private int _selectedY = -1;
@@ -44,8 +45,11 @@ namespace Gazeus.DesafioMatch3.Controllers
         private void Awake()
         {
             DOTween.SetTweensCapacity(500, 50);
+
             _gameService = new GameService();
-            _scoreController = new ScoreController();
+            _buffController = new BuffController();
+            _scoreController = new ScoreController(_buffController);
+
             _boardView.TileClicked += OnTileClick;
 
             _gameUI.SubscribeEvents(_scoreController);
@@ -77,6 +81,9 @@ namespace Gazeus.DesafioMatch3.Controllers
             DOTween.KillAll();
             _isAnimating = false;
 
+            _currentLevel = 1;
+            _targetScore = 100;
+
             _boardView.DestroyBoard();
             _gameUI.SetEnableRestartScreen(false);
 
@@ -93,6 +100,30 @@ namespace Gazeus.DesafioMatch3.Controllers
             _boardView.CreateBoard(board);
             _boardView.MakeAllTilesPopUp().Play();
             SoundController.Play("Click");
+        }
+
+        private void AdvanceLevel()
+        {
+            DOTween.KillAll();
+            _isAnimating = false;
+
+            _currentLevel++;
+            _targetScore += Mathf.RoundToInt(_targetScore * 0.5f);
+
+            _boardView.DestroyBoard();
+
+            ResetSelection();
+            _currentMoves = _maxMoves;
+
+            _scoreController.ResetScore();
+
+            _gameUI.SetTargetScore(_targetScore);
+            _gameUI.SetCurrentMoves(_currentMoves);
+            _gameUI.SetLevel(_currentLevel);
+
+            List<List<Tile>> board = _gameService.StartGame(_boardWidth, _boardHeight);
+            _boardView.CreateBoard(board);
+            _boardView.MakeAllTilesPopUp().Play();
         }
 
         private void OnTileClick(int x, int y)
@@ -203,7 +234,7 @@ namespace Gazeus.DesafioMatch3.Controllers
         {
             if (_scoreController.GetCurrentScore() >= _targetScore)
             {
-                Debug.Log("Win!");
+                _gameUI.OpenBuffSelection(_buffController, AdvanceLevel);
             }
             else if (_currentMoves <= 0)
             {

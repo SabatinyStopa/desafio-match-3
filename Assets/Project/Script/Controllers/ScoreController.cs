@@ -8,8 +8,11 @@ namespace Gazeus.DesafioMatch3.Controllers
     {
         public Action<int, int, int, ResolveType> OnScoreUpdated;
         private int _currentScore;
+        private BuffController _buffController;
 
-        private const int BASE_POINTS = 1;
+        private const int BASE_POINTS = 35;
+
+        public ScoreController(BuffController buffController) => _buffController = buffController;
 
         public void RegisterMatch(
             int tileType,
@@ -18,11 +21,11 @@ namespace Gazeus.DesafioMatch3.Controllers
             ResolveType resolveType
         )
         {
-            int earnedPoints = Mathf.RoundToInt(tileCount * BASE_POINTS * comboLevel);
+            int earnedPoints = Mathf.RoundToInt(tileCount * BASE_POINTS * _buffController.GetMultiplier(resolveType));
 
             _currentScore += earnedPoints;
 
-            OnScoreUpdated?.Invoke(_currentScore, tileCount * BASE_POINTS, comboLevel, resolveType);
+            OnScoreUpdated?.Invoke(_currentScore, earnedPoints, comboLevel, resolveType);
         }
 
         public int GetCurrentScore() => _currentScore;
