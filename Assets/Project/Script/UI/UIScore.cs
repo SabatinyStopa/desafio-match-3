@@ -41,7 +41,6 @@ namespace Gazeus.DesafioMatch3.UI
         public void UpdateScore(
             int currentScore,
             int earnedPoints,
-            int matchType,
             int comboLevel,
             ResolveType type
         )

@@ -6,7 +6,7 @@ namespace Gazeus.DesafioMatch3.Controllers
 {
     public class ScoreController
     {
-        public Action<int, int, int, int, ResolveType> OnScoreUpdated;
+        public Action<int, int, int, ResolveType> OnScoreUpdated;
         private int _currentScore;
 
         private const int BASE_POINTS = 1;
@@ -18,11 +18,11 @@ namespace Gazeus.DesafioMatch3.Controllers
             ResolveType resolveType
         )
         {
-            int earnedPoints = Mathf.RoundToInt(tileCount * BASE_POINTS);
+            int earnedPoints = Mathf.RoundToInt(tileCount * BASE_POINTS * comboLevel);
 
             _currentScore += earnedPoints;
 
-            OnScoreUpdated?.Invoke(_currentScore, earnedPoints, tileType, comboLevel, resolveType);
+            OnScoreUpdated?.Invoke(_currentScore, tileCount * BASE_POINTS, comboLevel, resolveType);
         }
 
         public int GetCurrentScore() => _currentScore;
@@ -30,7 +30,7 @@ namespace Gazeus.DesafioMatch3.Controllers
         public void ResetScore()
         {
             _currentScore = 0;
-            OnScoreUpdated?.Invoke(_currentScore, 0, 1, 0, ResolveType.None);
+            OnScoreUpdated?.Invoke(_currentScore, 0, 0, ResolveType.None);
         }
     }
 }
