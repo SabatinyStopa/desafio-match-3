@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using DG.Tweening;
+using Gazeus.DesafioMatch3.Controllers;
 using Gazeus.DesafioMatch3.Models;
 using Gazeus.DesafioMatch3.ScriptableObjects;
 using Gazeus.DesafioMatch3.Utilities;
@@ -98,6 +99,7 @@ namespace Gazeus.DesafioMatch3.Views
             Sequence sequence = DOTween.Sequence();
             sequence.Append(GetTileSpot(fromX, fromY).AnimateSetTile(tileTo.gameObject));
             sequence.Join(GetTileSpot(toX, toY).AnimateSetTile(tileFrom.gameObject));
+            sequence.InsertCallback(0f, () => SoundController.Play("SwapTile"));
 
             _tiles[toY, toX] = tileFrom;
             _tiles[fromY, fromX] = tileTo;
@@ -128,6 +130,8 @@ namespace Gazeus.DesafioMatch3.Views
                     currentTime += TILE_APPEAR_INTERVAL_DURATION;
                 }
             }
+
+            sequence.AppendCallback(() => SoundController.Play("SpawnTile"));
 
             return sequence;
         }

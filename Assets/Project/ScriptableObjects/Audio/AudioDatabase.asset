@@ -12,4 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0de14968832d2af46a2fee860c69e44b, type: 3}
   m_Name: AudioDatabase
   m_EditorClassIdentifier: DesafioMatch3::Gazeus.DesafioMatch3.ScriptableObjects.Audio.AudioDatabase
-  _sounds: []
+  _sounds:
+  - {fileID: 11400000, guid: 8f6d966d291f59c4ab25cadcbd7dcb87, type: 2}
+  - {fileID: 11400000, guid: 36b395ecf985b2c4f899f6eb9b9203fb, type: 2}
+  - {fileID: 11400000, guid: dec3a8d572742214795f28a738d7101c, type: 2}
+  - {fileID: 11400000, guid: 111739457fb06e74596c1b2ee6d99b36, type: 2}
+  - {fileID: 11400000, guid: e30b95bc2edd8c14a9b5cab448f76f7f, type: 2}

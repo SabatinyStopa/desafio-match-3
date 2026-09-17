@@ -115,6 +115,7 @@ namespace Gazeus.DesafioMatch3.Controllers
                 return;
             }
 
+            SoundController.Play("SelectTile");
             ExecuteMove(_selectedX, _selectedY, targetX, targetY);
         }
 
@@ -142,17 +143,6 @@ namespace Gazeus.DesafioMatch3.Controllers
             else
             {
                 RevertSwap(fromX, fromY, toX, toY);
-            }
-        }
-
-        private void RegisterSequenceScores(List<BoardSequence> sequences)
-        {
-            for (int i = 0; i < sequences.Count; i++)
-            {
-                BoardSequence sequence = sequences[i];
-                int comboLevel = i + 1;
-
-                _scoreController.RegisterMatch(sequence.MatchType, sequence.MatchCount, comboLevel);
             }
         }
 
@@ -187,22 +177,17 @@ namespace Gazeus.DesafioMatch3.Controllers
                 comboLevel
             );
 
-            sequence.AppendCallback(() =>
-            {
-                _boardView.DestroyTiles(boardSequence.MatchedPosition);
-            });
+            sequence.AppendCallback(() => _boardView.DestroyTiles(boardSequence.MatchedPosition));
 
-            sequence.AppendCallback(() =>
-            {
-                _boardView.MoveTiles(boardSequence.MovedTiles).Play();
-            });
+            sequence.AppendCallback(() => SoundController.Play("Explosion"));
+
+            sequence.AppendCallback(() => _boardView.MoveTiles(boardSequence.MovedTiles).Play());
 
             sequence.AppendInterval(appendInterval);
 
-            sequence.AppendCallback(() =>
-            {
-                _boardView.CreateTile(boardSequence.AddedTiles).Play();
-            });
+            sequence.AppendCallback(() => _boardView.CreateTile(boardSequence.AddedTiles).Play());
+
+            sequence.AppendCallback(() => SoundController.Play("SpawnTile"));
 
             sequence.AppendInterval(appendInterval);
 

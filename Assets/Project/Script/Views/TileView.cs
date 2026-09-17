@@ -1,4 +1,5 @@
 using DG.Tweening;
+using Gazeus.DesafioMatch3.Controllers;
 using UnityEngine;
 
 namespace Gazeus.DesafioMatch3.Views
@@ -21,6 +22,7 @@ namespace Gazeus.DesafioMatch3.Views
 
         public void Select()
         {
+            SoundController.Play("SelectTile");
             transform.DOKill();
             transform
                 .DOPunchScale(Vector3.one * 0.2f, 0.2f)
@@ -29,6 +31,7 @@ namespace Gazeus.DesafioMatch3.Views
 
         public void UnSelect()
         {
+            SoundController.Play("UnSelectTile");
             transform.DOKill();
             transform
                 .DOPunchScale(Vector3.one * 0.2f, 0.2f)
