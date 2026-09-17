@@ -10,7 +10,7 @@ namespace Gazeus.DesafioMatch3.Views
         private SpriteRenderer _selectedBorder;
 
         [SerializeField]
-        private SpriteRenderer _background;
+        private SpriteRenderer _image;
 
         private int _currentType;
 
@@ -18,7 +18,7 @@ namespace Gazeus.DesafioMatch3.Views
         private void OnDestroy() => transform.DOKill();
         #endregion
 
-        public void SetColor(Color color) => _background.color = color;
+        public void SetImage(Sprite sprite) => _image.sprite = sprite;
 
         public void Select()
         {

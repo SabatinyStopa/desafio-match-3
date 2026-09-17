@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: TilePrefabRepository
   m_EditorClassIdentifier: 
   _tilesTypes:
-  - {r: 0, g: 1, b: 0.15702271, a: 1}
-  - {r: 0.9607843, g: 0.17647056, b: 0.57067764, a: 1}
-  - {r: 0.49328658, g: 0.4292453, b: 1, a: 1}
-  - {r: 1, g: 0.42477313, b: 0, a: 1}
+  - {fileID: 21300000, guid: 7ebd3b9bc08510d4e93e9f3050aa89d0, type: 3}
+  - {fileID: 21300000, guid: 4b97580d419de804e988d3ce2abb70fc, type: 3}
+  - {fileID: 21300000, guid: b571fa65008f3dc408a66133e77a5664, type: 3}
+  - {fileID: 21300000, guid: 32badc2cb3df7c547a72de6028608d76, type: 3}

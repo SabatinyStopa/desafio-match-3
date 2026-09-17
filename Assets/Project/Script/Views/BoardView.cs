@@ -234,7 +234,7 @@ namespace Gazeus.DesafioMatch3.Views
             return _tilePool.Get(tile =>
             {
                 tile.transform.localScale = Vector3.zero;
-                tile.SetColor(_tilePrefabRepository.TileTypes[typeIndex]);
+                tile.SetImage(_tilePrefabRepository.TileTypes[typeIndex]);
                 tile.SetType(typeIndex);
             });
         }

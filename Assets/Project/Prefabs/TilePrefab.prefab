@@ -118,7 +118,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1.05, y: 1.05, z: 1.05}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 7683249527159319483}
@@ -172,8 +172,8 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 1
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 21300000, guid: d58f571ed08756244810b16c97833f64, type: 3}
-  m_Color: {r: 0, g: 1, b: 0.8228364, a: 1}
+  m_Sprite: {fileID: 21300000, guid: 6c73b4c642d7de045867e92884d747f6, type: 3}
+  m_Color: {r: 1, g: 0.42802858, b: 0, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -336,4 +336,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: DesafioMatch3::Gazeus.DesafioMatch3.Views.TileView
   _selectedBorder: {fileID: 8569905831506666482}
-  _background: {fileID: 8875408782198149675}
+  _image: {fileID: 8875408782198149675}

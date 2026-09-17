@@ -1294,8 +1294,8 @@ ParticleSystem:
       maxColor: {r: 1, g: 1, b: 1, a: 1}
       maxGradient:
         serializedVersion: 2
-        key0: {r: 1, g: 0.42352942, b: 0, a: 1}
-        key1: {r: 0.41509432, g: 0.17580466, b: 0, a: 0}
+        key0: {r: 0, g: 0.53333336, b: 1, a: 1}
+        key1: {r: 0, g: 0.23647797, b: 0.4433962, a: 0}
         key2: {r: 0, g: 0, b: 0, a: 0}
         key3: {r: 0, g: 0, b: 0, a: 0}
         key4: {r: 0, g: 0, b: 0, a: 0}
@@ -5021,7 +5021,7 @@ ParticleSystem:
       serializedVersion: 2
       minMaxState: 0
       minColor: {r: 1, g: 1, b: 1, a: 1}
-      maxColor: {r: 1, g: 0.42352942, b: 0, a: 1}
+      maxColor: {r: 0, g: 0.53333336, b: 1, a: 1}
       maxGradient:
         serializedVersion: 2
         key0: {r: 1, g: 1, b: 1, a: 1}
@@ -11007,9 +11007,9 @@ ParticleSystem:
       maxColor: {r: 1, g: 1, b: 1, a: 1}
       maxGradient:
         serializedVersion: 2
-        key0: {r: 1, g: 0.42352942, b: 0, a: 1}
-        key1: {r: 0.6509434, g: 0.2916241, b: 0.027634379, a: 1}
-        key2: {r: 0.3490566, g: 0.14783575, b: 0, a: 0}
+        key0: {r: 0, g: 0.53333336, b: 1, a: 1}
+        key1: {r: 0, g: 0.33207545, b: 0.6226415, a: 1}
+        key2: {r: 0, g: 0.17106916, b: 0.3207547, a: 0}
         key3: {r: 0, g: 0, b: 0, a: 0}
         key4: {r: 0, g: 0, b: 0, a: 0}
         key5: {r: 0, g: 0, b: 0, a: 0}
@@ -14716,7 +14716,7 @@ ParticleSystem:
       serializedVersion: 2
       minMaxState: 0
       minColor: {r: 1, g: 1, b: 1, a: 1}
-      maxColor: {r: 1, g: 0.42352942, b: 0, a: 1}
+      maxColor: {r: 0, g: 0.53333336, b: 1, a: 1}
       maxGradient:
         serializedVersion: 2
         key0: {r: 1, g: 1, b: 1, a: 1}
@@ -15833,7 +15833,7 @@ ParticleSystem:
       maxGradient:
         serializedVersion: 2
         key0: {r: 1, g: 0.9647059, b: 0.9529412, a: 1}
-        key1: {r: 1, g: 0.42352942, b: 0, a: 1}
+        key1: {r: 0, g: 0.53333336, b: 1, a: 1}
         key2: {r: 1, g: 0.30980393, b: 0, a: 0}
         key3: {r: 0, g: 0, b: 0, a: 0}
         key4: {r: 0, g: 0, b: 0, a: 0}
@@ -19385,7 +19385,7 @@ GameObject:
   - component: {fileID: 19935754}
   - component: {fileID: 5712392834174165241}
   m_Layer: 0
-  m_Name: ExplosionOrange
+  m_Name: ExplosionBlue
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -20504,7 +20504,7 @@ ParticleSystem:
     enabled: 1
     x:
       serializedVersion: 2
-      minMaxState: 0
+      minMaxState: 2
       scalar: 1
       minScalar: 0
       maxCurve:
@@ -20557,7 +20557,7 @@ ParticleSystem:
         m_RotationOrder: 4
     y:
       serializedVersion: 2
-      minMaxState: 0
+      minMaxState: 2
       scalar: 1
       minScalar: 0
       maxCurve:
@@ -20672,8 +20672,8 @@ ParticleSystem:
       maxGradient:
         serializedVersion: 2
         key0: {r: 1, g: 1, b: 1, a: 1}
-        key1: {r: 1, g: 0.42352942, b: 0, a: 1}
-        key2: {r: 0.5849056, g: 0.25249618, b: 0.0082769515, a: 0}
+        key1: {r: 0, g: 0.5332718, b: 1, a: 1}
+        key2: {r: 0, g: 0.27076894, b: 0.509434, a: 0}
         key3: {r: 0, g: 0.25490198, b: 1, a: 0}
         key4: {r: 0, g: 0, b: 0, a: 0}
         key5: {r: 0, g: 0, b: 0, a: 0}
@@ -24241,9 +24241,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 679aad88af8505548b0f85e1b6e24dbe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: DesafioMatch3::Gazeus.DesafioMatch3.Views.ExplosionEffectView
-  _particlesToChangeColor:
-  - {fileID: 19865388}
-  - {fileID: 19886732}
   _particles:
   - {fileID: 19804094}
   - {fileID: 19865388}
