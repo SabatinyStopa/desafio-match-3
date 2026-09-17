@@ -2254,8 +2254,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _boardView: {fileID: 429446043}
   _gameUI: {fileID: 1037565594}
-  _boardHeight: 10
-  _boardWidth: 10
+  _boardHeight: 6
+  _boardWidth: 6
 --- !u!4 &1361904665
 Transform:
   m_ObjectHideFlags: 0
